@@ -8,6 +8,7 @@ on:
 jobs:
   check-uptime:
     runs-on: ubuntu-latest
+    environment: DIALOG_MONITOR_SLACK_WEBHOOK
 
     steps:
       - name: Check if site is up
