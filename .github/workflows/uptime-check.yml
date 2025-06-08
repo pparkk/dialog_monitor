@@ -8,7 +8,7 @@ on:
 jobs:
   check-uptime:
     runs-on: ubuntu-latest
-    environment: monitoring_environment  # This must match your GitHub environment name exactly
+    environment: monitoring_environment
 
     steps:
       - name: Check if site is up
@@ -21,10 +21,21 @@ jobs:
       - name: Send Slack alert if down
         if: steps.check.outputs.status_code != '200'
         env:
-          SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}  # Secret defined in your environment
+          SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}
         run: |
           curl -X POST "$SLACK_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
               "text": "🚨 *Matsuri HR Login Page is DOWN!* Status code: '${{ steps.check.outputs.status_code }}'"
+            }'
+
+      - name: Send Slack message if up
+        if: steps.check.outputs.status_code == '200'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "✅ Matsuri HR Login Page is UP — everything is ok!"
             }'
