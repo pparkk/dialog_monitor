@@ -2,7 +2,7 @@
 
   on:
     schedule:
-      - cron: "*/5 * * * *"  # every 5 minutes -- varies by GitHub network
+      - cron: "*/5 * * * *" 
 
   jobs:
     check-uptime:
