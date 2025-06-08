@@ -2,7 +2,7 @@ name: Matsuri HR Uptime Monitor
 
 on:
   schedule:
-    - cron: "*/15 * * * *" # every 15 minutes (UTC)
+    - cron: "*/15 * * * *" 
   workflow_dispatch:
 
 jobs:
