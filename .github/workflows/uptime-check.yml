@@ -1,18 +1,19 @@
-name: Matsuri HR Uptime Monitor
+name: Matsuri HR Jobs Page Uptime Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  
+    - cron: "*/5 * * * *"  # every 5 minutes -- varies by GitHub network
+
 jobs:
   check-uptime:
     runs-on: ubuntu-latest
     environment: monitoring_environment
 
     steps:
-      - name: Check if site is up
+      - name: Check Jobs page status
         id: check
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://matsuri-hr.com/login)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://matsuri-hr.com/jobs)
           echo "HTTP status: $STATUS"
           echo "status_code=$STATUS" >> $GITHUB_OUTPUT
 
@@ -24,7 +25,7 @@ jobs:
           curl -X POST "$SLACK_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
-              "text": "🚨 *Matsuri HR Login Page is DOWN!* Status code: '${{ steps.check.outputs.status_code }}'"
+              "text": "🚨 *Matsuri HR Jobs Page is DOWN!* Status code: '${{ steps.check.outputs.status_code }}'"
             }'
 
       - name: Send Slack message if up
@@ -35,5 +36,5 @@ jobs:
           curl -X POST "$SLACK_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
-              "text": "✅ Matsuri HR Login Page is UP — everything is ok!"
+              "text": "✅ Matsuri HR Jobs Page is UP — everything is OK!"
             }'
