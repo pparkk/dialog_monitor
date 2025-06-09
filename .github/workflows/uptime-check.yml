@@ -27,14 +27,3 @@
               -d '{
                 "text": "🚨 *Matsuri HR Jobs Page is DOWN!* Status code: '${{ steps.check.outputs.status_code }}'"
               }'
-
-        - name: Send Slack message if up
-          if: steps.check.outputs.status_code == '200'
-          env:
-            SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}
-          run: |
-            curl -X POST "$SLACK_WEBHOOK" \
-              -H "Content-Type: application/json" \
-              -d '{
-                "text": "✅ Matsuri HR Jobs Page is UP — everything is OK!"
-              }'
