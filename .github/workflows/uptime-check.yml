@@ -1,29 +1,42 @@
-  name: Matsuri HR Jobs Page Uptime Monitor
+name: Matsuri HR Login API Monitor
 
-  on:
-    schedule:
-      - cron: "*/30 * * * *" 
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 minutes
 
-  jobs:
-    check-uptime:
-      runs-on: ubuntu-latest
-      environment: monitoring_environment
+jobs:
+  check-login:
+    runs-on: ubuntu-latest
+    environment: monitoring_environment
 
-      steps:
-        - name: Check Jobs page status
-          id: check
-          run: |
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://matsuri-hr.com/jobs)
-            echo "HTTP status: $STATUS"
-            echo "status_code=$STATUS" >> $GITHUB_OUTPUT
+    steps:
+      - name: Attempt login to API
+        id: login
+        run: |
+          RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST https://api.matsuri-hr.com/hunting_users/sign_in \
+            -H "Content-Type: application/json" \
+            -d '{
+              "email": "hunting_user_1@mdragon.xyz",
+              "password": "@p#sswoRD1_3",
+              "grant_type": "password",
+              "rememberMe": false
+            }')
 
-        - name: Send Slack alert if down
-          if: steps.check.outputs.status_code != '200'
-          env:
-            SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}
-          run: |
-            curl -X POST "$SLACK_WEBHOOK" \
-              -H "Content-Type: application/json" \
-              -d '{
-                "text": "🚨 *Matsuri HR Jobs Page is DOWN!* Status code: '${{ steps.check.outputs.status_code }}'"
-              }'
+          # Extract body and status
+          BODY=$(echo "$RESPONSE" | sed -e 's/HTTPSTATUS\:.*//g')
+          STATUS=$(echo "$RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+          echo "Login HTTP status: $STATUS"
+          echo "status_code=$STATUS" >> $GITHUB_OUTPUT
+          echo "response_body=$BODY" >> $GITHUB_OUTPUT
+
+      - name: Send Slack alert if login fails
+        if: steps.login.outputs.status_code != '200'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.DIALOG_MONITOR_SLACK_WEBHOOK }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🚨 *Login to Matsuri HR API failed!* Status code: '${{ steps.login.outputs.status_code }}'"
+            }'
