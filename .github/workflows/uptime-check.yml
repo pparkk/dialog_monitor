@@ -12,15 +12,18 @@ jobs:
     steps:
       - name: Attempt login to API
         id: login
+        env:
+          MONITOR_ACCOUNT: ${{ secrets.MONITOR_ACCOUNT }}
+          MONITOR_PASSWORD: ${{ secrets.MONITOR_PASSWORD }}
         run: |
           RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST https://api.matsuri-hr.com/hunting_users/sign_in \
             -H "Content-Type: application/json" \
-            -d '{
-              "email": "hunting_user_1@mdragon.xyz",
-              "password": "@p#sswoRD1_3",
-              "grant_type": "password",
-              "rememberMe": false
-            }')
+            -d "{
+              \"email\": \"$MONITOR_ACCOUNT\",
+              \"password\": \"$MONITOR_PASSWORD\",
+              \"grant_type\": \"password\",
+              \"rememberMe\": false
+            }")
 
           # Extract body and status
           BODY=$(echo "$RESPONSE" | sed -e 's/HTTPSTATUS\:.*//g')
