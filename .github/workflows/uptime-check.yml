@@ -2,7 +2,7 @@ name: Matsuri HR Login API Monitor
 
 on:
   schedule:
-    - cron: "0 * * * *"  # every hour
+    - cron: "*/29 * * * *"  # every 29 minutes
 
 jobs:
   check-login:
@@ -41,7 +41,7 @@ jobs:
           curl -X POST "$SLACK_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{
-              "text": "🚨 @Eric @MaxPark @Kota @Gentaro *Login to Matsuri HR API failed!* Status code: '${{ steps.login.outputs.status_code }}'"
+              "text": "🚨 @webdev @Eric @MaxPark @Kota @Gentaro *Login to Matsuri HR API failed!* Status code: '${{ steps.login.outputs.status_code }}'"
             }'
 
       - name: Send Slack success message
